@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <title>Memory</title>
+    <style>
+        img {
+            width: 100px;
+        }
+
+        #plateau {
+            margin-left: auto;
+            margin-right: auto;
+            width: 6em;
+            border: thick double black;
+
+        }
+
+        #rejouer {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        p {
+            text-align: center;
+        }
+
+        body {
+            background-color: darkgrey;
+        }
+
+        h1 {
+            text-align: center;
+
+        }
+    </style>
+</head>
+
+<body>
+    <h1> 🃏Memory 🃏</h1>
+    <p id="score"></p>
+    <div>
+        <table id="plateau">
+            <tr>
+                <td><img src="img/carte.png" id='carte' /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+
+            </tr>
+            <tr>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+
+            </tr>
+            <tr>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+
+            </tr>
+            <tr>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+                <td><img src="img/carte.png" /></td>
+
+            </tr>
+            <!-- <canvas id="canvas" ></canvas>-->
+
+        </table>
+    </div>
+    </br>
+    <p>
+        <button id="rejouer" onclick="location.reload();">Rejouer</button>
+        <button id="solution">Solution</button>
+    </p>
+
+    <script>
+
+        var motifsCartes = [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16, 16];//16 motifs differenets+doubles
+        var etatsCartes = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; //Depart face cacher 0 face cachée 1 face visible et -1 disparait
+        var cartesRetournees = []; 
+        var nbPairesTrouvees = 0;
+        var imagesCartes = document.getElementById("plateau").getElementsByTagName("img");
+        for (var i = 0; i < imagesCartes.length; i++) {
+            imagesCartes[i].noCarte = i; //Ajout de la propriété noCarte à l'objet img
+            imagesCartes[i].onclick = function () {
+                controleJeu(this.noCarte);
+            }
+        }
+        initialiseJeu();//melanger carte
+        function majAffichage(noCarte) {
+            switch (etatsCartes[noCarte]) {
+                case 0:
+                    imagesCartes[noCarte].src = "img/carte.png";
+                    break;
+                case 1:
+                    imagesCartes[noCarte].src = "img/carte" + motifsCartes[noCarte] + ".png";
+                    break;
+                case -1:
+                    imagesCartes[noCarte].style.visibility = "hidden";
+                    break;
+            }
+        }
+        function rejouer() {
+            alert("Bravo !!!");
+            l.reload();
+        }
+
+        function initialiseJeu() {
+            for (var position = motifsCartes.length - 1; position >= 1; position--) {
+                var hasard = Math.floor(Math.random() * (position + 1));
+                var sauve = motifsCartes[position];
+                motifsCartes[position] = motifsCartes[hasard];
+                motifsCartes[hasard] = sauve;
+            }
+        }
+        function controleJeu(noCarte) {
+            if (cartesRetournees.length < 2) {//2 cartes retourné max
+                if (etatsCartes[noCarte] == 0) {
+                    etatsCartes[noCarte] = 1;
+                    cartesRetournees.push(noCarte);
+                    majAffichage(noCarte);
+                }
+                if (cartesRetournees.length == 2) {
+                    var nouveauEtat = 0;
+                    if (motifsCartes[cartesRetournees[0]] == motifsCartes[cartesRetournees[1]]) {
+                        nouveauEtat = -1;
+                        nbPairesTrouvees++;
+                    }
+                    document.getElementById("score").innerHTML = "Nombres de Paires Trouvées : " + nbPairesTrouvees;
+
+
+                    etatsCartes[cartesRetournees[0]] = nouveauEtat;
+                    etatsCartes[cartesRetournees[1]] = nouveauEtat;
+                    setTimeout(function () {
+
+                        majAffichage(cartesRetournees[0]);
+                        majAffichage(cartesRetournees[1]);
+                        cartesRetournees = [];
+
+                        if (nbPairesTrouvees == 16) {
+                            rejouer();
+                        }
+                    }, 850);
+                }
+            }
+
+        }
+
+    </script>
+    <script type="text/javascript">
+
+        $("#solution").click(function () {
+            
+              alert("Cliquer sur chaques cartes pour les retourner et voir la solution");
+
+            for (var i = 0; i < imagesCartes.length; i++) {
+                imagesCartes[i].noCarte = i;
+                imagesCartes[i].onclick = function () {
+                    controleJeu2(this.noCarte);
+                }
+
+                function controleJeu2(noCarte) {
+                    if (cartesRetournees.length <= 32) {
+                        if (etatsCartes[noCarte] == 0) {
+                            etatsCartes[noCarte] = 1;
+                            cartesRetournees.push(noCarte);
+                            majAffichage2(noCarte);
+                        }
+
+                    }
+                }
+            }
+            function majAffichage2(noCarte) {
+                switch (etatsCartes[noCarte]) {
+                    case 1:
+                        imagesCartes[noCarte].src = "img/carte" + motifsCartes[noCarte] + ".png";
+                        break;
+                }
+            }
+
+        });
+
+    </script>
+</body>
+
+</html>
